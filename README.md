@@ -1,68 +1,52 @@
-# Proyecto Chatbot Unisinu
+# Proyecto ChatBot UniSinú (Ingenierías)
 
-Este es un chatbot de WhatsApp diseñado para asistir a los estudiantes de la Universidad del Sinú (Unisinu) con información académica, procesos de matrícula, bienestar universitario y más.
+Este es un asistente virtual desarrollado en Python para la Facultad de Ingeniería de la Universidad del Sinú. El bot permite a los estudiantes consultar pensum, requisitos de materias, información de bienestar universitario, posgrados y procesos de matrícula a través de WhatsApp.
 
 ## 🚀 Características
 
-- **Gestión de Sesiones:** Mantiene el contexto de la conversación para cada usuario.
-- **Menús Interactivos:** Navegación sencilla a través de opciones numéricas y palabras clave.
-- **Información Académica:** Consulta de pensum y requisitos de materias para programas de ingeniería.
-- **Bienestar Universitario:** Información sobre deportes, actividades culturales y servicios de alimentación.
-- **Analítica Integrada:** Registro de interacciones para mejora continua y estadísticas de uso.
+- **Consulta de Pensum:** Visualización de la malla curricular por programa.
+- **Requisitos de Materias:** Información detallada sobre prerrequisitos para Ingeniería de Sistemas y otros programas.
+- **Bienestar Universitario:** Horarios e información de deportes (fútbol, pesas, taekwondo, etc.) y actividades culturales (danza, música, coro).
+- **Proceso de Matrícula:** Guía paso a paso asistida por imágenes para la inscripción de materias.
+- **Posgrados:** Información sobre doctorados, maestrías y especializaciones.
+- **Análisis de Uso:** Sistema integrado para rastrear consultas populares y actividad de usuarios.
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Tecnologías
 
-- **Python 3.x**
-- **Flask:** Micro-framework web para manejar el webhook.
-- **Twilio API:** Integración con WhatsApp.
-- **SQLite:** Almacenamiento de estadísticas y analítica.
-- **Pandas:** Procesamiento de datos para reportes.
+- **Lenguaje:** Python 3.x
+- **Framework Web:** Flask (para el Webhook)
+- **Comunicación:** Twilio API for WhatsApp
+- **Base de Datos:** SQLite (para analíticas)
+- **Librerías principales:** Twilio, Flask, Python-dotenv, Pillow (PIL), Pandas.
 
-## 📦 Instalación y Configuración
+## 📂 Estructura del Proyecto
 
-1.  **Clonar el repositorio:**
-    ```bash
-    git clone https://github.com/santiagomartinez0523-lab/proyecto-chatbot-unisinu.git
-    cd proyecto-chatbot-unisinu
-    ```
+- `whatsapp_bot.py`: Punto de entrada principal para el servidor Flask/Twilio.
+- `menu_handler.py`: Cerebro del bot que gestiona estados y flujos de conversación.
+- `session_manager.py`: Gestión de persistencia de sesiones de usuario.
+- `programas/`: Lógica específica para cada carrera de ingeniería.
+- `bienestar/`: Información sobre deportes y cultura.
+- `services/`: Servicio de analíticas y base de datos.
+- `*_data.py`: Archivos de datos estructurados para el bot.
 
-2.  **Crear un entorno virtual:**
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate  # En Windows: .venv\Scripts\activate
-    ```
+## 🔧 Instalación y Configuración
 
-3.  **Instalar dependencias:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+1. Clonar el repositorio.
+2. Crear un entorno virtual: `python -m venv venv`.
+3. Activar el entorno virtual.
+4. Instalar dependencias: `pip install -r requirements.txt`.
+5. Configurar el archivo `.env` con las credenciales de Twilio (SID, Token, etc.).
+6. Ejecutar localmente con: `python whatsapp_bot.py`.
+7. (Opcional) Usar `ngrok` para exponer el servidor local a internet.
 
-4.  **Configurar variables de entorno:**
-    Crea un archivo `.env` en la raíz del proyecto con tus credenciales de Twilio:
-    ```env
-    TWILIO_ACCOUNT_SID=tu_sid
-    TWILIO_AUTH_TOKEN=tu_token
-    TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
-    ```
+## 📊 Analíticas
 
-## 🚀 Ejecución
-
-Para iniciar el servidor del chatbot:
-
+Para ver las estadísticas de uso del bot, ejecuta:
 ```bash
-python whatsapp_bot.py
+python ver_estadisticas.py
 ```
 
-## 📁 Estructura del Proyecto
+## ✒️ Autor
 
-- `whatsapp_bot.py`: Punto de entrada principal y manejo de rutas Flask.
-- `menu_handler.py`: Lógica central de procesamiento de mensajes y menús.
-- `session_manager.py`: Gestión de estados de sesión persistentes.
-- `requisitos_data.py`: Base de datos de materias y prerrequisitos.
-- `services/`: Servicios adicionales como analítica y analytics_service.
-- `programas/`: Módulos específicos para cada programa académico.
-- `bienestar/`: Módulos relacionados con bienestar universitario.
-
-## 👥 Contribuidores
-
-- Santiago Martinez
+**Santiago Martínez**
+Repositorio original: [proyecto-chatbot-unisinu](https://github.com/santiagomartinez0523-lab/proyecto-chatbot-unisinu)
