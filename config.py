@@ -1,22 +1,19 @@
-# config.py
-# Configuración general y URLs de recursos
+# config.py - Configuración del bot
 
-# URLs de Imágenes (Imágenes alojadas en Imgur para acceso público de WhatsApp/Twilio)
+# URLs de las imágenes en Imgur
+# IMPORTANTE: Reemplaza estas URLs con las tuyas de Imgur
 IMAGE_URLS = {
-    'LOGOU': 'https://i.imgur.com/your_logo_here.png',
-    'MATRICULA': 'https://i.imgur.com/your_instruction_image.png',
-    
-    # Pensum por programa
-    'PENSUM_SISTEMAS': 'https://i.imgur.com/example_systems.png',
-    'PENSUM_INDUSTRIAL': 'https://i.imgur.com/example_industrial.png',
-    'PENSUM_CIVIL': 'https://i.imgur.com/example_civil.png',
-    'PENSUM_ELECTRICA': 'https://i.imgur.com/example_electric.png',
-    'PENSUM_ELECTROMECANICA': 'https://i.imgur.com/example_electromec.png',
-
-    # Reemplazar con los links reales de Imgur generados para el proyecto
-    'Ing_sistema.png': 'https://i.imgur.com/example.png',
-    'ing_industrial.png': 'https://i.imgur.com/example.png',
-    'ing_civil.png': 'https://i.imgur.com/example.png',
-    'ing_electrica.png': 'https://i.imgur.com/example.png',
-    'ing_electromecanica.png': 'https://i.imgur.com/example.png',
+    'ing_sistema': 'https://i.ibb.co/KxkQCJ5B/Ing-sistema.png',  # Reemplazar con tu URL
+    'ing_industrial': 'https://i.ibb.co/gZTjm5yW/ing-industrial.png',  # Reemplazar con tu URL
+    'ing_civil': 'https://i.ibb.co/prxthsHr/ing-civil.png',  # Reemplazar con tu URL
+    'ing_electrica': 'https://i.ibb.co/ns33fS4F/ing-electrica.png',  # Reemplazar con tu URL
+    'ing_electromecanica': 'https://i.ibb.co/99xmJ3kh/ing-electromecanica.png',  # Reemplazar con tu URL
 }
+
+# Configuración general
+BOT_NAME = "ChatBot Universitario"
+BOT_VERSION = "1.0.0"
+
+# Mensajes del sistema
+MENSAJE_ERROR = "❌ Lo siento, ocurrió un error. Por favor intenta nuevamente o escribe *menu* para volver al inicio."
+MENSAJE_COMANDO_INVALIDO = "❌ Comando no reconocido. Escribe *menu* para ver las opciones."

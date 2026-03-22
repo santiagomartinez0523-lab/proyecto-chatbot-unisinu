@@ -1,71 +1,79 @@
+# session_manager.py
+# Gestor de sesiones de usuario en memoria y disco
+
 import json
 import os
 
 class SessionManager:
-    """Maneja las sesiones de los usuarios en un archivo JSON"""
+    """Clase para manejar las sesiones de los usuarios (estado y datos temporales)"""
     
     def __init__(self, filename='sessions.json'):
         self.filename = filename
         self.sessions = self._load_sessions()
-        
+
     def _load_sessions(self):
-        """Carga las sesiones desde el archivo JSON"""
+        """Carga las sesiones desde un archivo JSON si existe"""
         if os.path.exists(self.filename):
             try:
                 with open(self.filename, 'r', encoding='utf-8') as f:
                     return json.load(f)
-            except:
+            except Exception as e:
+                print(f"⚠️ Error cargando sesiones: {e}")
                 return {}
         return {}
-        
+
     def _save_sessions(self):
-        """Guarda las sesiones en el archivo JSON"""
+        """Guarda las sesiones actuales en el archivo JSON"""
         try:
             with open(self.filename, 'w', encoding='utf-8') as f:
                 json.dump(self.sessions, f, indent=4, ensure_ascii=False)
         except Exception as e:
-            print(f"Error guardando sesiones: {e}")
-            
+            print(f"⚠️ Error guardando sesiones: {e}")
+
     def get_session(self, phone_number):
-        """Retorna la sesión de un usuario, si no existe la crea"""
+        """Retorna la sesión de un usuario o crea una nueva si no existe"""
         if phone_number not in self.sessions:
             self.sessions[phone_number] = {
                 'estado': 'inicio',
-                'datos_temporales': {},
-                'ultima_interaccion': '' # Podrías agregar timestamps
+                'datos_temporales': {}
             }
-            self._save_sessions()
+            # No guardamos aquí para no llenar el disco con sesiones vacías
         return self.sessions[phone_number]
-        
+
     def update_session(self, phone_number, estado=None, datos_temporales=None):
-        """Actualiza el estado o los datos de una sesión"""
+        """Actualiza el estado y/o datos temporales de una sesión"""
         if phone_number not in self.sessions:
             self.get_session(phone_number)
             
         if estado:
             self.sessions[phone_number]['estado'] = estado
+        
         if datos_temporales is not None:
-            # merge o reemplazo? probemos merge
+            # Si se pasan nuevos datos, los fusionamos con los existentes
             self.sessions[phone_number]['datos_temporales'].update(datos_temporales)
             
         self._save_sessions()
-        
+
     def reset_session(self, phone_number):
-        """Vuelve la sesión al estado inicial"""
+        """Reinicia la sesión del usuario al estado inicial"""
         self.sessions[phone_number] = {
             'estado': 'inicio',
             'datos_temporales': {}
         }
         self._save_sessions()
 
-    def get_all_sessions(self):
-        """Devuelve todas las sesiones (para debug)"""
-        return self.sessions
+    def clear_temporal_data(self, phone_number):
+        """Limpia solo los datos temporales sin cambiar el estado"""
+        if phone_number in self.sessions:
+            self.sessions[phone_number]['datos_temporales'] = {}
+            self._save_sessions()
 
     def delete_session(self, phone_number):
-        """Elimina una sesión de un usuario"""
+        """Elimina por completo la sesión de un usuario"""
         if phone_number in self.sessions:
             del self.sessions[phone_number]
             self._save_sessions()
-            return True
-        return False
+
+    def get_all_sessions(self):
+        """Retorna todas las sesiones activas"""
+        return self.sessions
