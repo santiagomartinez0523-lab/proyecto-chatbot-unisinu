@@ -49,4 +49,5 @@ python ver_estadisticas.py
 ## ✒️ Autor
 
 **Santiago Martínez**
+**Alexander Perez**
 Repositorio original: [proyecto-chatbot-unisinu](https://github.com/santiagomartinez0523-lab/proyecto-chatbot-unisinu)
