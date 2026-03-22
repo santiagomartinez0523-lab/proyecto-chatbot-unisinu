@@ -1,4 +1,6 @@
-from programas.numero import pedir_numero
+
+from numero import pedir_numero
+
 
 
 def funcion_sistema():
