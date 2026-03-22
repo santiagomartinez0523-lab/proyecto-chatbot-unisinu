@@ -1,57 +1,100 @@
 import sqlite3
 
-def migrar_labels():
-    conn = sqlite3.connect('chatbot_analytics.db')
+
+def migrar_interacciones(db_path="chatbot_analytics.db"):
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    
-    # Lista de mapeos para la tabla interacciones
-    mapeos = [
-        # Menú Principal
-        ("estado = 'menu_principal' AND mensaje_usuario = '1'", "Pensum"),
-        ("estado = 'menu_principal' AND mensaje_usuario = '2'", "Matrícula"),
-        ("estado = 'menu_principal' AND mensaje_usuario = '3'", "Posgrados"),
-        ("estado = 'menu_principal' AND mensaje_usuario = '4'", "Cursos Inglés"),
-        ("estado = 'menu_principal' AND mensaje_usuario = '5'", "Bienestar"),
-        ("estado = 'menu_principal' AND mensaje_usuario = '6'", "Tutorías"),
-        ("estado = 'menu_principal' AND mensaje_usuario = '7'", "Semilleros"),
-        ("estado = 'menu_principal' AND mensaje_usuario = '8'", "Requisitos"),
-        ("estado = 'menu_principal' AND mensaje_usuario = '9'", "Reportes"),
-        
-        # Selección de Programa
-        ("estado = 'seleccionar_programa' AND mensaje_usuario = '1'", "Ing. Sistemas"),
-        ("estado = 'seleccionar_programa' AND mensaje_usuario = '2'", "Ing. Industrial"),
-        ("estado = 'seleccionar_programa' AND mensaje_usuario = '3'", "Ing. Civil"),
-        ("estado = 'seleccionar_programa' AND mensaje_usuario = '4'", "Ing. Eléctrica"),
-        ("estado = 'seleccionar_programa' AND mensaje_usuario = '5'", "Ing. Electromecánica"),
-        
-        # Selección de Bienestar
-        ("estado = 'seleccionar_bienestar' AND mensaje_usuario = '1'", "Deportes"),
-        ("estado = 'seleccionar_bienestar' AND mensaje_usuario = '2'", "Cultura"),
-        ("estado = 'seleccionar_bienestar' AND mensaje_usuario = '3'", "Comida"),
-        
-        # Deportes específicos
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '1'", "Fútbol"),
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '2'", "Futsala"),
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '3'", "Taekwondo"),
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '4'", "Rugby"),
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '5'", "Pesas"),
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '6'", "Voleibol"),
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '7'", "Baloncesto"),
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '8'", "Softbol"),
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '9'", "Tenis"),
-        ("estado = 'bienestar_deportes' AND mensaje_usuario = '10'", "Gimnasio"),
-    ]
-    
-    print("Iniciando migración de etiquetas en la tabla de interacciones...")
-    
-    for condicion, label in mapeos:
-        query = f"UPDATE interacciones SET opcion_elegida = '{label}' WHERE {condicion}"
-        cursor.execute(query)
-        print(f"Actualizada etiqueta: {label}")
-        
+
+    cursor.execute("SELECT id, estado, opcion_elegida, categoria, subcategoria, mensaje_usuario FROM interacciones")
+    filas = cursor.fetchall()
+
+    menu_labels = {
+        "1": "pensum",
+        "2": "matricula",
+        "3": "posgrados",
+        "4": "cursos_ingles_espanol",
+        "5": "bienestar",
+        "6": "tutorias",
+        "7": "semilleros",
+        "8": "requisitos",
+        "9": "reportes",
+    }
+
+    bienestar_labels = {
+        "1": "deportes",
+        "2": "area_cultural",
+        "3": "comida",
+    }
+
+    deportes_labels = {
+        "1": "Futbol",
+        "2": "Futsala",
+        "3": "Taekwondo",
+        "4": "Rugby",
+        "5": "Levantamiento de Pesas",
+        "6": "Voleybol",
+        "7": "Baloncesto",
+        "8": "Softbol",
+        "9": "Tenis de Mesa",
+        "10": "Gimnasio Multifuerza",
+    }
+
+    actualizados = 0
+
+    for row in filas:
+        row_id, estado, opcion, categoria, subcategoria, mensaje_usuario = row
+        if opcion is None:
+            continue
+
+        opcion_str = str(opcion).strip()
+        nuevo_opcion = None
+        nuevo_subcategoria = subcategoria
+        nuevo_mensaje = mensaje_usuario
+
+        if estado == "menu_principal" and opcion_str in menu_labels:
+            nuevo_opcion = menu_labels[opcion_str]
+            if mensaje_usuario is not None and str(mensaje_usuario).strip() == opcion_str:
+                nuevo_mensaje = nuevo_opcion
+
+        if estado == "seleccionar_bienestar" and opcion_str in bienestar_labels:
+            nuevo_opcion = bienestar_labels[opcion_str]
+            if categoria == "bienestar" and not subcategoria:
+                nuevo_subcategoria = nuevo_opcion
+            if mensaje_usuario is not None and str(mensaje_usuario).strip() == opcion_str:
+                nuevo_mensaje = nuevo_opcion
+
+        if estado == "bienestar_deportes" and opcion_str in deportes_labels:
+            nombre = deportes_labels[opcion_str]
+            nuevo_opcion = nombre
+            if categoria == "bienestar":
+                nuevo_subcategoria = f"deportes_{nombre}"
+            if mensaje_usuario is not None and str(mensaje_usuario).strip() == opcion_str:
+                nuevo_mensaje = nombre
+
+        if estado == "seleccionar_pensum" and opcion_str.isdigit():
+            # En este flujo ya se guarda el nombre del programa en subcategoria.
+            if subcategoria:
+                nuevo_opcion = subcategoria
+                if mensaje_usuario is not None and str(mensaje_usuario).strip() == opcion_str:
+                    nuevo_mensaje = subcategoria
+
+        if (nuevo_mensaje is None or str(nuevo_mensaje).strip() == "") and nuevo_opcion is not None:
+            nuevo_mensaje = nuevo_opcion
+
+        if nuevo_opcion is not None and (
+            str(nuevo_opcion) != opcion_str or (mensaje_usuario != nuevo_mensaje)
+        ):
+            cursor.execute(
+                "UPDATE interacciones SET opcion_elegida = ?, subcategoria = ?, mensaje_usuario = ? WHERE id = ?",
+                (nuevo_opcion, nuevo_subcategoria, nuevo_mensaje, row_id),
+            )
+            actualizados += 1
+
     conn.commit()
     conn.close()
-    print("Migración completada con éxito.")
+
+    print(f"Registros actualizados: {actualizados}")
+
 
 if __name__ == "__main__":
-    migrar_labels()
+    migrar_interacciones()

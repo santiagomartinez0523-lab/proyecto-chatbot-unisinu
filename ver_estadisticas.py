@@ -1,53 +1,60 @@
-import sqlite3
-import pandas as pd
-from datetime import datetime, timedelta
+# ver_estadisticas.py
+# Script para ver las estadísticas del chatbot
 
-def ver_estadisticas():
-    conn = sqlite3.connect('chatbot_analytics.db')
+from services.analytics_service import AnalyticsService
+
+def mostrar_estadisticas():
+    """Muestra las estadísticas del chatbot en consola"""
+    analytics = AnalyticsService()
     
-    print("\n" + "="*40)
-    print("📊 REPORTE DE ESTADÍSTICAS DEL CHATBOT")
-    print("="*40)
+    print("="*60)
+    print("📊 ESTADÍSTICAS DEL CHATBOT UNIVERSITARIO")
+    print("="*60)
     
-    # 1. Total de interacciones
-    total = pd.read_sql_query("SELECT COUNT(*) as total FROM interacciones", conn).iloc[0]['total']
-    print(f"\n✅ Total de interacciones registradas: {total}")
+    # Resumen general
+    resumen = analytics.obtener_resumen_general()
+    print("\n📈 RESUMEN GENERAL:")
+    print(f"   Total de interacciones: {resumen['total_interacciones']}")
+    print(f"   Usuarios únicos: {resumen['usuarios_unicos']}")
+    print(f"   Opción más popular: {resumen['opcion_mas_popular']}")
+    print(f"   Veces usada: {resumen['veces_usada']}")
     
-    # 2. Opciones más consultadas del menú principal
-    print("\n🔝 Opciones más populares del Menú Principal:")
-    query_menu = """
-    SELECT opcion_id, num_consultas 
-    FROM estadisticas_menu 
-    ORDER BY num_consultas DESC
-    """
-    df_menu = pd.read_sql_query(query_menu, conn)
-    # Mapeo de nombres si quieres
-    print(df_menu)
+    # Usuarios activos
+    usuarios_7d = analytics.obtener_usuarios_activos(7)
+    print(f"\n👥 Usuarios activos (últimos 7 días): {usuarios_7d}")
     
-    # 3. Programas más consultados
-    print("\n🎓 Programas más consultados (Pensum/Requisitos):")
-    df_prog = pd.read_sql_query("SELECT nombre_programa, num_consultas FROM estadisticas_programas ORDER BY num_consultas DESC", conn)
-    print(df_prog)
-    
-    # 4. Actividad en las últimas 24 horas
-    hace_24h = (datetime.now() - timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S')
-    recientes = pd.read_sql_query(f"SELECT COUNT(*) as total FROM interacciones WHERE timestamp > '{hace_24h}'", conn).iloc[0]['total']
-    print(f"\n📈 Interacciones en las últimas 24h: {recientes}")
-    
-    # 5. Preguntas no respondidas
-    print("\n❓ Preguntas que el bot no pudo responder:")
-    df_no_resp = pd.read_sql_query("SELECT pregunta, timestamp FROM preguntas_no_respondidas ORDER BY timestamp DESC LIMIT 5", conn)
-    if df_no_resp.empty:
-        print("¡Ninguna! El bot ha entendido todo.")
+    # Estadísticas del menú principal
+    print("\n🎯 TOP 5 OPCIONES DEL MENÚ PRINCIPAL:")
+    stats_menu = analytics.obtener_estadisticas_menu_principal()
+    if not stats_menu.empty:
+        top_5 = stats_menu.head(5)
+        for idx, row in top_5.iterrows():
+            print(f"   {row['opcion']}. {row['nombre_opcion']}: {row['contador']} veces")
     else:
-        print(df_no_resp)
-        
-    conn.close()
-    print("\n" + "="*40 + "\n")
+        print("   (Sin datos aún)")
+    
+    # Programas más consultados
+    print("\n🎓 PROGRAMAS MÁS CONSULTADOS:")
+    stats_programas = analytics.obtener_estadisticas_programas()
+    if not stats_programas.empty:
+        for idx, row in stats_programas.head(5).iterrows():
+            print(f"   • {row['programa']}: {row['contador']} consultas")
+    else:
+        print("   (Sin datos aún)")
+    
+    # Bienestar
+    print("\n🏃 ACTIVIDADES DE BIENESTAR MÁS CONSULTADAS:")
+    stats_bienestar = analytics.obtener_estadisticas_bienestar()
+    if not stats_bienestar.empty:
+        for idx, row in stats_bienestar.head(10).iterrows():
+            if row['opcion'] != 'menu':
+                print(f"   • {row['tipo'].capitalize()} - {row['opcion']}: {row['contador']} veces")
+    else:
+        print("   (Sin datos aún)")
+    
+    print("\n" + "="*60)
+    print("✅ Estadísticas generadas exitosamente")
+    print("="*60)
 
-if __name__ == "__main__":
-    try:
-        ver_estadisticas()
-    except Exception as e:
-        print(f"Error al cargar base de datos: {e}")
-        print("Asegúrese de que el bot se haya ejecutado al menos una vez para generar 'chatbot_analytics.db'")
+if __name__ == '__main__':
+    mostrar_estadisticas()
